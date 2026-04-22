@@ -15,6 +15,7 @@ Build a mobile-first AI music assistant that analyzes user audio or song links t
 - My Voice screen now reads vocal range from global state
 - Songbook screen with realistic placeholder entries
 - Consistent dark-mode theme using slate grey, electric blue, and amber accents
+- Backend: /api/process (Groq RAG + transposition) and /api/analyze-audio (Gemini Pro vocal range) endpoints wired with env key placeholders
 
 ## Backlog
 ### P0
