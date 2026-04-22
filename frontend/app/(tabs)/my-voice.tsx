@@ -2,10 +2,13 @@ import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, spacing } from "../../constants/theme";
+import { useMusic } from "../../context/MusicContext";
 
 const chartHeights = [28, 40, 55, 70, 86, 72, 58, 44, 60, 78, 52, 36];
 
 export default function MyVoiceScreen() {
+  const { vocalRange } = useMusic();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
@@ -17,7 +20,7 @@ export default function MyVoiceScreen() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Detected Range</Text>
-          <Text style={styles.rangeText}>E2 - C5</Text>
+          <Text style={styles.rangeText}>{vocalRange}</Text>
           <View style={styles.chart}>
             {chartHeights.map((height, index) => (
               <View
