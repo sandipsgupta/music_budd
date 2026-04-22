@@ -10,8 +10,9 @@ Build a mobile-first AI music assistant that analyzes user audio or song links t
 
 ## What's Implemented
 - Bottom tab navigation with Studio, My Voice, and Songbook screens
-- Studio UI shell with chat placeholders, song link input, and animated Hold to Record button
-- My Voice screen with placeholder vocal range chart
+- Global MusicContext storing vocal range and selected instrument
+- Studio chat flow with loading bubble, TranspositionCard results, and animated Hold to Record button
+- My Voice screen now reads vocal range from global state
 - Songbook screen with realistic placeholder entries
 - Consistent dark-mode theme using slate grey, electric blue, and amber accents
 

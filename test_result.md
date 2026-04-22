@@ -168,14 +168,11 @@
 ## metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: true
 
 ## test_plan:
-  current_focus:
-    - "Bottom tab navigation and screen shells"
-    - "Studio screen chat + record UI"
-    - "My Voice and Songbook placeholder screens"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
