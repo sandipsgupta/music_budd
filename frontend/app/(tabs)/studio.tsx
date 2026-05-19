@@ -12,19 +12,22 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BackendStatusBanner from "../../components/BackendStatus";
 import ChatBubble from "../../components/ChatBubble";
 import RecordButton from "../../components/RecordButton";
 import TranspositionCard from "../../components/TranspositionCard";
 import { colors, spacing } from "../../constants/theme";
 import { useMusic } from "../../context/MusicContext";
-import { processSong } from "../../lib/api";
+import { formatApiError, processSong } from "../../lib/api";
 
 const initialMessages = [
   {
     id: "welcome",
     sender: "assistant",
     type: "text",
-    text: "Welcome to ScaleMate. Enter a song title to get a beginner-friendly key and chords.",
+    text:
+      "Type a real song title (e.g. Blinding Lights or Yesterday). " +
+      "I will look up the chords with AI and suggest an easier key for guitar.",
   },
 ];
 
@@ -45,6 +48,19 @@ export default function StudioScreen() {
   const handleSubmit = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed || isSubmitting) {
+      return;
+    }
+
+    if (trimmed.length < 2) {
+      setChatItems((prev) => [
+        ...prev,
+        {
+          id: `hint-${Date.now()}`,
+          sender: "assistant",
+          type: "text",
+          text: "Please enter a song title (at least 2 characters), e.g. Blinding Lights.",
+        },
+      ]);
       return;
     }
 
@@ -90,10 +106,7 @@ export default function StudioScreen() {
         ];
       });
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again.";
+      const message = formatApiError(error);
 
       setChatItems((prev) => {
         const withoutLoading = prev.filter((item) => item.id !== loadingId);
@@ -122,7 +135,8 @@ export default function StudioScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Studio</Text>
-          <Text style={styles.subtitle}>Your AI music companion</Text>
+          <Text style={styles.subtitle}>AI transpose for beginners</Text>
+          <BackendStatusBanner />
         </View>
 
         <ScrollView
@@ -174,7 +188,7 @@ export default function StudioScreen() {
         <View style={styles.composer}>
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder="Paste a song link or title"
+              placeholder="Song title, e.g. Blinding Lights"
               placeholderTextColor={colors.textMuted}
               style={styles.input}
               autoCapitalize="none"

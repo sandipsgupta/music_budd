@@ -2,12 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, spacing } from "../../constants/theme";
-import { useMusic } from "../../context/MusicContext";
-
-const chartHeights = [28, 40, 55, 70, 86, 72, 58, 44, 60, 78, 52, 36];
+import { DEFAULT_VOCAL_RANGE, useMusic } from "../../context/MusicContext";
 
 export default function MyVoiceScreen() {
-  const { vocalRange } = useMusic();
+  const { vocalRange, hasRecordedVocalRange } = useMusic();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -15,31 +13,33 @@ export default function MyVoiceScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Voice</Text>
-          <Text style={styles.subtitle}>Vocal range snapshot</Text>
+          <Text style={styles.subtitle}>Used to personalize keys in Studio</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Detected Range</Text>
-          <Text style={styles.rangeText}>{vocalRange}</Text>
-          <View style={styles.chart}>
-            {chartHeights.map((height, index) => (
-              <View
-                key={`bar-${index}`}
-                style={[styles.bar, { height }]}
-              />
-            ))}
-          </View>
-          <View style={styles.rangeLabels}>
-            <Text style={styles.rangeLabelText}>Low</Text>
-            <Text style={styles.rangeLabelText}>High</Text>
-          </View>
+          <Text style={styles.cardTitle}>Vocal range</Text>
+          {hasRecordedVocalRange ? (
+            <>
+              <Text style={styles.rangeText}>{vocalRange}</Text>
+              <Text style={styles.badge}>Recorded</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.placeholderRange}>Not recorded yet</Text>
+              <Text style={styles.helper}>
+                Studio uses a default range ({DEFAULT_VOCAL_RANGE}) until you
+                record your voice. Voice scan is coming in the next update.
+              </Text>
+            </>
+          )}
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Tips</Text>
+        <View style={[styles.card, styles.mutedCard]}>
+          <Text style={styles.cardTitle}>How it will work</Text>
           <Text style={styles.tipText}>
-            Warm up for 5 minutes before recording to get the most accurate
-            range read.
+            1. Hold to Record in Studio{"\n"}
+            2. We analyze your range with AI{"\n"}
+            3. Song suggestions fit your voice better
           </Text>
         </View>
       </ScrollView>
@@ -76,42 +76,45 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     marginBottom: spacing.lg,
   },
+  mutedCard: {
+    opacity: 0.95,
+  },
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: colors.textPrimary,
   },
   rangeText: {
-    marginTop: 6,
-    fontSize: 20,
+    marginTop: 8,
+    fontSize: 22,
     fontWeight: "700",
     color: colors.electricBlue,
   },
-  chart: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginTop: spacing.lg,
-    gap: 6,
-    height: 100,
-  },
-  bar: {
-    width: 12,
-    borderRadius: 6,
-    backgroundColor: colors.amber,
-  },
-  rangeLabels: {
-    marginTop: spacing.sm,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  rangeLabelText: {
+  placeholderRange: {
+    marginTop: 8,
+    fontSize: 18,
+    fontWeight: "600",
     color: colors.textMuted,
-    fontSize: 12,
+  },
+  badge: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+    fontSize: 11,
+    fontWeight: "700",
+    color: colors.amber,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  helper: {
+    marginTop: spacing.sm,
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
   },
   tipText: {
     marginTop: spacing.sm,
     color: colors.textPrimary,
-    lineHeight: 20,
+    lineHeight: 22,
     fontSize: 14,
   },
 });
