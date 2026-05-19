@@ -1,34 +1,21 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "../constants/theme";
-import { useMusic } from "../context/MusicContext";
-
-const openChordMap = {
-  Fm: "Em",
-  Bbm: "Am",
-  Ab: "G",
-  Eb: "D",
-};
 
 export default function TranspositionCard({
   originalKey,
   recommendedKey,
   chordsArray,
+  originalChordsArray,
 }) {
-  const { selectedInstrument } = useMusic();
   const [simplified, setSimplified] = useState(true);
 
   const displayChords = useMemo(() => {
-    if (selectedInstrument !== "Guitar") {
+    if (simplified) {
       return chordsArray;
     }
-
-    if (!simplified) {
-      return chordsArray;
-    }
-
-    return chordsArray.map((chord) => openChordMap[chord] || chord);
-  }, [chordsArray, selectedInstrument, simplified]);
+    return originalChordsArray?.length ? originalChordsArray : chordsArray;
+  }, [chordsArray, originalChordsArray, simplified]);
 
   return (
     <View style={styles.wrapper}>
@@ -49,12 +36,12 @@ export default function TranspositionCard({
         </View>
 
         <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Simplified</Text>
+          <Text style={styles.toggleLabel}>Beginner-friendly</Text>
           <Pressable
             onPress={() => setSimplified((prev) => !prev)}
             style={[styles.toggle, simplified && styles.toggleActive]}
             accessibilityRole="button"
-            accessibilityLabel="Toggle simplified chords"
+            accessibilityLabel="Toggle beginner-friendly chords"
           >
             <View
               style={[
@@ -76,8 +63,8 @@ export default function TranspositionCard({
           </View>
           <Text style={styles.helperText}>
             {simplified
-              ? "Open-chord friendly voicings for guitar."
-              : "Standard barre positions for the full voicing."}
+              ? "Guitar-friendly voicings shifted for easier open chords."
+              : "Original chord progression before transposition."}
           </Text>
         </View>
       </View>

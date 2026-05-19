@@ -16,48 +16,25 @@ import ChatBubble from "../../components/ChatBubble";
 import RecordButton from "../../components/RecordButton";
 import TranspositionCard from "../../components/TranspositionCard";
 import { colors, spacing } from "../../constants/theme";
+import { useMusic } from "../../context/MusicContext";
+import { processSong } from "../../lib/api";
 
 const initialMessages = [
   {
-    id: "1",
+    id: "welcome",
     sender: "assistant",
     type: "text",
-    text: "Welcome to ScaleMate. Paste a song link or record a riff to get started.",
-  },
-  {
-    id: "2",
-    sender: "user",
-    type: "text",
-    text: "I want to transpose 'Blinding Lights' to a beginner-friendly key.",
-  },
-  {
-    id: "3",
-    sender: "assistant",
-    type: "text",
-    text: "Great choice. I can shift it to G major and simplify the chords.",
+    text: "Welcome to ScaleMate. Enter a song title to get a beginner-friendly key and chords.",
   },
 ];
 
-const mockTransposition = {
-  originalKey: "Fm",
-  recommendedKey: "Em",
-  chordsArray: ["Fm", "Bbm", "Ab", "Eb"],
-};
-
 export default function StudioScreen() {
+  const { vocalRange, selectedInstrument } = useMusic();
   const [inputValue, setInputValue] = useState("");
   const [chatItems, setChatItems] = useState(initialMessages);
-  const timerRef = useRef(null);
-  const scrollRef = useRef(null);
-  const canSend = inputValue.trim().length > 0;
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const canSend = inputValue.trim().length > 0 && !isSubmitting;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -65,9 +42,9 @@ export default function StudioScreen() {
     }
   }, [chatItems.length]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmed = inputValue.trim();
-    if (!trimmed) {
+    if (!trimmed || isSubmitting) {
       return;
     }
 
@@ -86,12 +63,15 @@ export default function StudioScreen() {
 
     setChatItems((prev) => [...prev, userMessage, loadingMessage]);
     setInputValue("");
+    setIsSubmitting(true);
 
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+    try {
+      const result = await processSong(
+        trimmed,
+        selectedInstrument,
+        vocalRange
+      );
 
-    timerRef.current = setTimeout(() => {
       setChatItems((prev) => {
         const withoutLoading = prev.filter((item) => item.id !== loadingId);
         return [
@@ -100,11 +80,36 @@ export default function StudioScreen() {
             id: `card-${Date.now()}`,
             sender: "assistant",
             type: "card",
-            data: mockTransposition,
+            data: {
+              originalKey: result.original_key,
+              recommendedKey: result.recommended_key,
+              chordsArray: result.transposed_chords_array,
+              originalChordsArray: result.original_chords_array,
+            },
           },
         ];
       });
-    }, 2000);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.";
+
+      setChatItems((prev) => {
+        const withoutLoading = prev.filter((item) => item.id !== loadingId);
+        return [
+          ...withoutLoading,
+          {
+            id: `error-${Date.now()}`,
+            sender: "assistant",
+            type: "text",
+            text: message,
+          },
+        ];
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -156,6 +161,7 @@ export default function StudioScreen() {
                     originalKey={item.data.originalKey}
                     recommendedKey={item.data.recommendedKey}
                     chordsArray={item.data.chordsArray}
+                    originalChordsArray={item.data.originalChordsArray}
                   />
                 </View>
               );
@@ -177,6 +183,7 @@ export default function StudioScreen() {
               onSubmitEditing={handleSubmit}
               value={inputValue}
               onChangeText={setInputValue}
+              editable={!isSubmitting}
             />
             <Pressable
               onPress={handleSubmit}

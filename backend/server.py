@@ -52,11 +52,13 @@ class StatusCheckCreate(BaseModel):
 class TranscriptionRequest(BaseModel):
     song_name: str
     instrument: str = "Guitar"
+    vocal_range: str = "E2-C5"
 
 
 class TranscriptionResponse(BaseModel):
     original_key: str
     recommended_key: str
+    original_chords_array: List[str]
     transposed_chords_array: List[str]
 
 
@@ -216,7 +218,7 @@ async def get_status_checks():
 
 @api_router.post("/process", response_model=TranscriptionResponse)
 async def process_transcription(request: TranscriptionRequest):
-    song_data = await get_song_data(request.song_name)
+    song_data = await get_song_data(request.song_name, request.vocal_range)
     chords = song_data["chords"]
     original_key = song_data["original_key"]
 
@@ -230,6 +232,7 @@ async def process_transcription(request: TranscriptionRequest):
     return TranscriptionResponse(
         original_key=original_key,
         recommended_key=recommended_key,
+        original_chords_array=chords,
         transposed_chords_array=transposed_chords,
     )
 

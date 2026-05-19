@@ -16,11 +16,12 @@ Build a mobile-first AI music assistant that analyzes user audio or song links t
 - Songbook screen with realistic placeholder entries
 - Consistent dark-mode theme using slate grey, electric blue, and amber accents
 - Backend: /api/process (Groq RAG + transposition) and /api/analyze-audio (Gemini Pro vocal range) endpoints wired with env key placeholders
+- Studio UI wired to POST /api/process with vocal_range + instrument from MusicContext
+- TranspositionCard shows server original vs beginner-friendly chord arrays
 
 ## Backlog
 ### P0
-- Implement audio recording flow and backend upload endpoint
-- Build transposition and chord simplification API responses
+- Implement audio recording flow and backend upload endpoint (needs GOOGLE_API_KEY)
 - Persist songbook entries to MongoDB
 
 ### P1
